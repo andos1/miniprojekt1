@@ -1,26 +1,17 @@
 package miniproject.mobilecomp.bfh.parkinglotfinder;
 
 
-import android.app.Activity;
 import android.app.Application;
-import android.location.Location;
 import android.util.Log;
-import android.widget.ArrayAdapter;
 
 import com.baasbox.android.BaasBox;
 import com.baasbox.android.BaasDocument;
 import com.baasbox.android.BaasHandler;
-import com.baasbox.android.BaasQuery;
 import com.baasbox.android.BaasResult;
 import com.baasbox.android.BaasUser;
 import com.baasbox.android.RequestToken;
-import com.baasbox.android.json.JsonArray;
-import com.baasbox.android.json.JsonObject;
-import com.baasbox.android.net.HttpRequest;
 
-import org.apache.http.message.BasicNameValuePair;
-
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -35,7 +26,7 @@ public class Backend extends Application {
             pw = "mobile15";
 
     private FrontViewController a;
-
+    private HashMap<String,Location> locations=new HashMap<>();
     private  RequestToken token;
     private RequestToken mRefresh;
     private void login(){
@@ -60,7 +51,7 @@ public class Backend extends Application {
                 }
             };
 
-    public void getLocationsNear(Location location,FrontViewController a){
+    public void getLocationsNear(android.location.Location location,FrontViewController a){
 
         this.a=a;
 
@@ -70,11 +61,8 @@ public class Backend extends Application {
             public void handle(BaasResult<List<BaasDocument>> listBaasResult) {
                 if(listBaasResult.isSuccess())
                     for(BaasDocument doc:listBaasResult.value()) {
-
+                        Backend.this.addLocation(doc.getString("name"),doc.getString("latitude"),doc.getString("longitude"));
                         Backend.this.a.addString(doc.getString("name"));
-                        Backend.this.a.addString(doc.getString("latitude"));
-                        Backend.this.a.addString(doc.getString("longitude"));
-                        Log.d("latitude", doc.getString("latitude"), listBaasResult.error());
 
                     }
                 else
@@ -106,6 +94,13 @@ public class Backend extends Application {
                 handler
            );*/
 
+    }
+
+    private void addLocation(String name, String latitude, String longitude) {
+        locations.put(name,new Location(name,Double.parseDouble(latitude),Double.parseDouble(longitude)));
+    }
+    public Location getLocation(String s){
+        return locations.get(s);
     }
 
 }
